@@ -25,6 +25,8 @@ const modes = [
 ];
 
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+
 function App() {
 
   const [mode, setMode] = useState("happy");
@@ -97,7 +99,7 @@ function App() {
     try {
 
       const response = await fetch(
-        "http://127.0.0.1:8000/chat",
+        `${API_BASE_URL}/chat`,
         {
           method: "POST",
 
@@ -114,7 +116,7 @@ function App() {
 
 
       if (!response.ok) {
-        throw new Error("Request failed");
+        throw new Error(`Request failed: ${response.status}`);
       }
 
 
