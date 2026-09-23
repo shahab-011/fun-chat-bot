@@ -1,7 +1,10 @@
 import { useState } from "react";
 import "./App.css";
 
+const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+
 function App() {
+  const [page, setPage] = useState("analyzer");
   const [document, setDocument] = useState("");
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -15,7 +18,7 @@ function App() {
     setError("");
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/analyze", {
+      const response = await fetch(`${API_URL}/analyze`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -43,6 +46,10 @@ function App() {
     setError("");
   };
 
+  if (page === "about") {
+    return <AboutPage onBack={() => setPage("analyzer")} />;
+  }
+
   return (
     <div className="app">
 
@@ -65,6 +72,10 @@ function App() {
           <span className="status-dot"></span>
           System Online
         </div>
+
+        <button className="about-link" onClick={() => setPage("about")}>
+          About PharmaLens <span>↗</span>
+        </button>
 
       </header>
 
@@ -290,6 +301,104 @@ function App() {
         PharmaLens · AI-powered pharmaceutical document intelligence
       </footer>
 
+    </div>
+  );
+}
+
+function AboutPage({ onBack }) {
+  return (
+    <div className="app about-page">
+      <div className="background-glow"></div>
+
+      <header className="navbar">
+        <div className="logo">
+          <div className="logo-mark">P</div>
+          <div>
+            <h2>PharmaLens</h2>
+            <span>Document Intelligence</span>
+          </div>
+        </div>
+
+        <button className="about-link" onClick={onBack}>
+          <span>←</span> Back to analyzer
+        </button>
+      </header>
+
+      <main className="about-container">
+        <section className="about-hero">
+          <span className="tag">ABOUT THE PROJECT</span>
+          <h1>
+            From complex documents to
+            <br />
+            <span>decisions people can use.</span>
+          </h1>
+          <p>
+            PharmaLens is an AI-powered pharmaceutical document intelligence
+            tool that turns dense research and regulatory text into structured,
+            validated data.
+          </p>
+        </section>
+
+        <section className="about-grid">
+          <article className="about-card about-card-wide">
+            <span className="about-number">01</span>
+            <h2>What PharmaLens is</h2>
+            <p>
+              Pharmaceutical documents contain valuable information, but it is
+              often buried across long paragraphs, tables, and inconsistent
+              reporting. PharmaLens uses a language model to extract clinical,
+              drug, regulatory, efficacy, safety, and data-quality details into
+              a consistent JSON structure.
+            </p>
+          </article>
+
+          <article className="about-card">
+            <span className="about-number">02</span>
+            <h2>The outcome</h2>
+            <p>
+              The result is a machine-readable summary that is easier to scan,
+              compare, validate, and connect to other systems. Pydantic
+              validation helps keep the output predictable and highlights
+              missing or contradictory information instead of hiding it.
+            </p>
+          </article>
+
+          <article className="about-card">
+            <span className="about-number">03</span>
+            <h2>Use cases</h2>
+            <ul>
+              <li>Clinical-trial and study report review</li>
+              <li>Drug-development research workflows</li>
+              <li>Regulatory and medical-literature intelligence</li>
+              <li>Comparing evidence across many documents</li>
+            </ul>
+          </article>
+        </section>
+
+        <section className="future-scope">
+          <div>
+            <span className="about-number">04 · FUTURE SCOPE</span>
+            <h2>Build a living intelligence layer for the industry.</h2>
+          </div>
+          <div className="future-copy">
+            <p>
+              The next step is to store this structured data in a secure,
+              searchable database. That foundation can turn one-off document
+              analysis into a real-world tool for pharmaceutical companies,
+              research teams, regulatory groups, and healthcare industries.
+            </p>
+            <div className="future-steps">
+              <span>Structured data</span>
+              <b>→</b>
+              <span>Searchable database</span>
+              <b>→</b>
+              <span>Industry workflows</span>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer>PharmaLens · AI-powered pharmaceutical document intelligence</footer>
     </div>
   );
 }

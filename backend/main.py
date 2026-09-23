@@ -1,147 +1,120 @@
-# from dotenv import load_dotenv
+import os
 
-# load_dotenv()
+from dotenv import load_dotenv
 
-# from fastapi import FastAPI
-# from fastapi.middleware.cors import CORSMiddleware
-# from pydantic import BaseModel
+load_dotenv()
 
-# from langchain_groq import ChatGroq
-# from langchain_core.messages import (
-#     AIMessage,
-#     SystemMessage,
-#     HumanMessage,
-# )
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+
+from langchain_groq import ChatGroq
+from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 
 
-# # =====================================================
-# # FASTAPI
-# # =====================================================
+# =====================================================
+# FASTAPI
+# =====================================================
 
-# app = FastAPI()
-
-
-# # =====================================================
-# # CORS
-# # =====================================================
-
-# app.add_middleware(
-#     CORSMiddleware,
-#     allow_origins=["http://localhost:5173"],
-#     allow_credentials=True,
-#     allow_methods=["*"],
-#     allow_headers=["*"],
-# )
+app = FastAPI(title="Teacher AI API")
 
 
-# # =====================================================
-# # GROQ MODEL
-# # =====================================================
+# =====================================================
+# CORS
+# =====================================================
 
-# model = ChatGroq(
-#     model="openai/gpt-oss-20b",
-#     temperature=0,
-#     max_tokens=1024,
-# )
+allowed_origins = [
+    origin.strip()
+    for origin in os.getenv(
+        "CORS_ORIGINS",
+        "http://localhost:5173,http://127.0.0.1:5173",
+    ).split(",")
+    if origin.strip()
+]
 
-
-# # =====================================================
-# # TEACHER MODES
-# # =====================================================
-
-# MODES = {
-#     "angry": "You are an angry teacher. Respond to the user in an angry tone.",
-    
-#     "depressed": "You are a depressed teacher. Respond to the user in a depressed tone.",
-    
-#     "happy": "You are a happy teacher. Respond to the user in a happy tone.",
-    
-#     "sad": "You are a sad teacher. Respond to the user in a sad tone.",
-# }
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=allowed_origins,
+    allow_origin_regex=r"https?://(localhost|127\.0\.0\.1)(:\d+)?$",
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
-# # =====================================================
-# # CONVERSATION
-# # =====================================================
+# =====================================================
+# GROQ MODEL
+# =====================================================
 
-# messages = []
-
-# current_mode = None
-
-
-# # =====================================================
-# # REQUEST MODEL
-# # =====================================================
-
-# class ChatRequest(BaseModel):
-#     message: str
-#     mode: str
+model = ChatGroq(
+    model="openai/gpt-oss-20b",
+    temperature=0,
+    max_tokens=1024,
+)
 
 
-# # =====================================================
-# # HOME
-# # =====================================================
+# =====================================================
+# TEACHER MODES
+# =====================================================
 
-# @app.get("/")
-# def home():
-#     return {
-#         "message": "Teacher AI API is running"
-#     }
-
-
-# # =====================================================
-# # CHAT
-# # =====================================================
-
-# @app.post("/chat")
-# def chat(request: ChatRequest):
-
-#     global messages
-#     global current_mode
-
-#     # Validate mode
-#     if request.mode not in MODES:
-#         return {
-#             "response": "Invalid teacher mode."
-#         }
+MODES = {
+    "angry": "You are an angry teacher. Respond to the user in an angry tone.",
+    "depressed": "You are a depressed teacher. Respond to the user in a depressed tone.",
+    "happy": "You are a happy teacher. Respond to the user in a happy tone.",
+    "sad": "You are a sad teacher. Respond to the user in a sad tone.",
+}
 
 
-#     # If user changes teacher mode,
-#     # start a new conversation.
-#     if current_mode != request.mode:
+# =====================================================
+# CONVERSATION STATE
+# =====================================================
 
-#         current_mode = request.mode
-
-#         messages = [
-#             SystemMessage(
-#                 content=MODES[request.mode]
-#             )
-#         ]
+messages = []
+current_mode = None
 
 
-#     # Add user message
+# =====================================================
+# REQUEST MODEL
+# =====================================================
 
-#     messages.append(
-#         HumanMessage(
-#             content=request.message
-#         )
-#     )
-
-
-#     # Get AI response
-
-#     response = model.invoke(messages)
+class ChatRequest(BaseModel):
+    message: str
+    mode: str
 
 
-#     # Store AI response
+# =====================================================
+# HOME
+# =====================================================
 
-#     messages.append(
-#         AIMessage(
-#             content=response.content
-#         )
-#     )
+@app.get("/")
+def home():
+    return {"message": "Teacher AI API is running"}
 
 
-#     return {
-#         "response": response.content
-#     }
+# =====================================================
+# CHAT
+# =====================================================
+
+@app.post("/chat")
+def chat(request: ChatRequest):
+    global messages
+    global current_mode
+
+    if request.mode not in MODES:
+        return {"response": "Invalid teacher mode."}
+
+    if current_mode != request.mode:
+        current_mode = request.mode
+        messages = [SystemMessage(content=MODES[request.mode])]
+
+    messages.append(HumanMessage(content=request.message))
+    response = model.invoke(messages)
+    messages.append(AIMessage(content=response.content))
+
+    return {"response": response.content}
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run("backend.main:app", host="127.0.0.1", port=8000, reload=False)
