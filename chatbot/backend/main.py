@@ -12,16 +12,7 @@ from langchain_groq import ChatGroq
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 
 
-# =====================================================
-# FASTAPI
-# =====================================================
-
 app = FastAPI(title="Teacher AI API")
-
-
-# =====================================================
-# CORS
-# =====================================================
 
 allowed_origins = [
     origin.strip()
@@ -41,21 +32,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-# =====================================================
-# GROQ MODEL
-# =====================================================
-
 model = ChatGroq(
     model="openai/gpt-oss-20b",
     temperature=0,
     max_tokens=1024,
 )
-
-
-# =====================================================
-# TEACHER MODES
-# =====================================================
 
 MODES = {
     "angry": "You are an angry teacher. Respond to the user in an angry tone.",
@@ -64,36 +45,16 @@ MODES = {
     "sad": "You are a sad teacher. Respond to the user in a sad tone.",
 }
 
-
-# =====================================================
-# CONVERSATION STATE
-# =====================================================
-
 messages = []
 current_mode = None
-
-
-# =====================================================
-# REQUEST MODEL
-# =====================================================
 
 class ChatRequest(BaseModel):
     message: str
     mode: str
 
-
-# =====================================================
-# HOME
-# =====================================================
-
 @app.get("/")
 def home():
     return {"message": "Teacher AI API is running"}
-
-
-# =====================================================
-# CHAT
-# =====================================================
 
 @app.post("/chat")
 def chat(request: ChatRequest):
@@ -113,8 +74,6 @@ def chat(request: ChatRequest):
 
     return {"response": response.content}
 
-
 if __name__ == "__main__":
     import uvicorn
-
     uvicorn.run("backend.main:app", host="127.0.0.1", port=8000, reload=False)
