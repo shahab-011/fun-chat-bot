@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+.env
+.env.*
+!.env.example
+
+# Frontend
+frontendd/node_modules/
+frontendd/dist/
+
+# Local tooling
+.DS_Store
+.vscode/
+*.log
