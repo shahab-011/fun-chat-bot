@@ -7,7 +7,7 @@ services:
     buildCommand: |
       python -m pip install --upgrade pip
       pip install --clear-cache -r requirements.txt
-    startCommand: PYTHONPATH=. uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+    startCommand: python -m uvicorn backend.main:app --host 0.0.0.0 --port $PORT
     autoDeploy: true
     envVars:
       - key: GROQ_API_KEY
