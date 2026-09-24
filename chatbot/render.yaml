@@ -6,11 +6,15 @@ services:
     rootDir: .
     buildCommand: |
       python -m pip install --upgrade pip
-      pip install -r requirements.txt
-    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+      pip install --clear-cache -r requirements.txt
+    startCommand: PYTHONPATH=. uvicorn backend.main:app --host 0.0.0.0 --port $PORT
     autoDeploy: true
     envVars:
       - key: GROQ_API_KEY
         sync: false
       - key: CORS_ORIGINS
-        value: "http://localhost:5173,http://127.0.0.1:5173"
+        value: "*"
+      - key: PYTHONPATH
+        value: "."
+      - key: PYTHON_VERSION
+        value: "3.11.9"
