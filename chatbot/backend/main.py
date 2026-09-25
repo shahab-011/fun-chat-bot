@@ -14,26 +14,21 @@ from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 
 app = FastAPI(title="Teacher AI API")
 
-allowed_origins = [
-    origin.strip()
-    for origin in os.getenv(
-        "CORS_ORIGINS",
-        "*",
-    ).split(",")
-    if origin.strip()
-]
+cors_origins_raw = os.getenv("CORS_ORIGINS", "*")
+allowed_origins = [origin.strip() for origin in cors_origins_raw.split(",") if origin.strip()]
+is_wildcard = "*" in allowed_origins
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=allowed_origins if "*" not in allowed_origins else ["*"],
-    allow_origin_regex=r"https?://.*",
-    allow_credentials=True,
+    allow_origins=allowed_origins,
+    allow_credentials=not is_wildcard,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+model_name = os.getenv("GROQ_MODEL", "openai/gpt-oss-20b")
 model = ChatGroq(
-    model="openai/gpt-oss-20b",
+    model=model_name,
     temperature=0,
     max_tokens=1024,
 )

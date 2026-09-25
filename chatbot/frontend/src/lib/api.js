@@ -1,6 +1,9 @@
-const API_BASE =
+const rawUrl =
   import.meta.env.VITE_API_BASE ||
+  import.meta.env.VITE_API_URL ||
   'http://localhost:8000'
+
+const API_BASE = rawUrl.replace(/\/+$/, '')
 
 export async function sendMessage(message, mode, signal) {
   const res = await fetch(`${API_BASE}/chat`, {
